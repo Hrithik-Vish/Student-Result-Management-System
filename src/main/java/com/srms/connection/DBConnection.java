@@ -18,7 +18,7 @@ public class DBConnection {
 
                 String url = "jdbc:postgresql://localhost:5432/srms";
                 String username = "postgres";
-                String password = "696369";
+                String password = "your_password_here";
 
                 connection = DriverManager.getConnection(url, username, password);
 
