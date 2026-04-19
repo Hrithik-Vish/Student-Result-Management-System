@@ -103,23 +103,23 @@ public class StudentDAO {
         return status;
     }
 
-    public Student getStudentById(int id){
-    	
+    // GET Student by ID
+    public Student getStudentById(int id) {
+
         Student student = null;
 
-        try{
-
+        try {
             Connection con = DBConnection.getConnection();
 
             String query = "SELECT * FROM students WHERE student_id=?";
 
             PreparedStatement ps = con.prepareStatement(query);
 
-            ps.setInt(1,id);
+            ps.setInt(1, id);
 
             ResultSet rs = ps.executeQuery();
 
-            if(rs.next()){
+            if (rs.next()) {
 
                 student = new Student();
 
@@ -127,16 +127,16 @@ public class StudentDAO {
                 student.setName(rs.getString("name"));
                 student.setEmail(rs.getString("email"));
                 student.setCourse(rs.getString("course"));
-
             }
 
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         return student;
     }
-    // DELETE Student
+
+    // DELETE Student (and their results first to avoid FK constraint violation)
     public boolean deleteStudent(int studentId) {
 
         boolean status = false;
@@ -144,13 +144,20 @@ public class StudentDAO {
         try {
             Connection con = DBConnection.getConnection();
 
-            String query = "DELETE FROM students WHERE student_id=?";
+            // Step 1: delete all results belonging to this student first
+            String deleteResults = "DELETE FROM results WHERE student_id=?";
+            PreparedStatement ps1 = con.prepareStatement(deleteResults);
+            ps1.setInt(1, studentId);
+            ps1.executeUpdate();
+            ps1.close();
 
-            PreparedStatement ps = con.prepareStatement(query);
+            // Step 2: now safe to delete the student
+            String deleteStudent = "DELETE FROM students WHERE student_id=?";
+            PreparedStatement ps2 = con.prepareStatement(deleteStudent);
+            ps2.setInt(1, studentId);
 
-            ps.setInt(1, studentId);
-
-            int rows = ps.executeUpdate();
+            int rows = ps2.executeUpdate();
+            ps2.close();
 
             if (rows > 0) {
                 status = true;

@@ -10,36 +10,30 @@ public class DBConnection {
 
     public static Connection getConnection() {
 
-        if (connection == null) {
-
-            try {
+        try {
+            // Reconnect if connection is null, closed, or no longer valid
+            if (connection == null || connection.isClosed() || !connection.isValid(2)) {
 
                 Class.forName("org.postgresql.Driver");
 
-                String url = "jdbc:postgresql://localhost:5432/srms";
+                String url      = "jdbc:postgresql://localhost:5432/srms";
                 String username = "postgres";
                 String password = System.getenv("DB_PASSWORD");
-                
+
                 connection = DriverManager.getConnection(url, username, password);
 
                 System.out.println("Database Connected Successfully");
-
-            } catch (ClassNotFoundException e) {
-
-                System.out.println("PostgreSQL JDBC Driver not found");
-                e.printStackTrace();
-
-            } catch (SQLException e) {
-
-                System.out.println("Database connection failed");
-                e.printStackTrace();
-
             }
 
+        } catch (ClassNotFoundException e) {
+            System.out.println("PostgreSQL JDBC Driver not found");
+            e.printStackTrace();
+
+        } catch (SQLException e) {
+            System.out.println("Database connection failed");
+            e.printStackTrace();
         }
 
         return connection;
-
     }
-
 }
